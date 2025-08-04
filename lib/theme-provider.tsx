@@ -28,9 +28,13 @@ export function ThemeProvider({
   storageKey = "qstore-ui-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
-  );
+  const [theme, setTheme] = useState<Theme>(() => {
+    // Check if we're on the client side before accessing localStorage
+    if (typeof window !== "undefined" && window.localStorage) {
+      return (localStorage.getItem(storageKey) as Theme) || defaultTheme;
+    }
+    return defaultTheme;
+  });
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -53,7 +57,10 @@ export function ThemeProvider({
   const value = {
     theme,
     setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
+      // Only access localStorage on the client side
+      if (typeof window !== "undefined" && window.localStorage) {
+        localStorage.setItem(storageKey, theme);
+      }
       setTheme(theme);
     },
   };
